@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>NXT Drive - Dashboard</title>
+	<link rel="stylesheet" th:href="@{/styleDashboard.css}">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=JetBrains+Mono:wght@400;500;700&family=Syncopate:wght@700&display=swap"
+		rel="stylesheet">
+</head>
+
+<body>
+
+	<header class="topbar">
+		<div class="logo">
+			<a th:href="@{/home}">
+				<img th:src="@{/img/nxtDriveLogo.jpg}" alt="Logo NXT Drive">
+			</a>
+		</div>
+		<h1
+			th:text="${contexto == 'produtos' ? 'NXT DRIVE • Produtos' : (contexto == 'usuarios' ? 'NXT DRIVE • Usuários' : 'NXT DRIVE • Categorias')}">
+			NXT DRIVE</h1>
+	</header>
+
+	<div class="layout">
+
+		<aside class="sidebar">
+
+			<h2>Menu</h2>
+
+			<ul>
+				<li>
+					<a th:href="@{/home}">Home</a>
+				</li>
+
+				<li th:classappend="${contexto == 'categorias' || contexto == null ? 'active' : ''}">
+					<a th:href="@{/dashboard}">Categorias</a>
+				</li>
+
+				<li th:classappend="${contexto == 'produtos' ? 'active' : ''}">
+					<a th:href="@{/produtos}">Produtos</a>
+				</li>
+
+				<li>Veículos</li>
+
+				<!-- MENU USUÁRIOS (Visível apenas para ADMIN) -->
+				<li sec:authorize="hasRole('ADMIN')" th:classappend="${contexto == 'usuarios' ? 'active' : ''}">
+					<a th:href="@{/usuarios}">Usuários</a>
+				</li>
+
+				<li>Configurações</li>
+			</ul>
+
+			<!-- BOTÕES DE ADICIONAR (Não exibidos na aba Usuários) -->
+			<button class="add-btn" th:if="${contexto == 'categorias' || contexto == null}" onclick="novaCategoria()">
+				+ Adicionar Categoria
+			</button>
+
+			<button class="add-btn" th:if="${contexto == 'produtos'}" onclick="novoProduto()">
+				+ Adicionar Produto
+			</button>
+
+			<!-- LOGOUT -->
+			<form class="logout-form" method="post" th:action="@{/logout}">
+				<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				<button type="submit" class="logout-btn">
+					<span>⏻</span>
+					Sair
+				</button>
+			</form>
+
+		</aside>
+
+		<main class="content">
+
+			<div th:if="${erro}"
+				style="color: #ff3366; background: rgba(115,0,36,0.2); padding: 15px; border-radius: 10px; border: 1px solid #730024; font-weight: bold; text-align: center; margin-bottom: 15px;">
+				<p th:text="${erro}"></p>
+			</div>
+
+			<div th:if="${sucesso}"
+				style="color: #00ff88; background: rgba(0,115,36,0.2); padding: 15px; border-radius: 10px; border: 1px solid #007324; font-weight: bold; text-align: center; margin-bottom: 15px;">
+				<p th:text="${sucesso}"></p>
+			</div>
+
+			<div class="card">
+				<h2 class="titulo-centralizado"
+					th:text="${contexto == 'produtos' ? 'Produtos Cadastrados' : (contexto == 'usuarios' ? 'Usuários do Sistema' : 'Categorias Cadastradas')}">
+					Listagem
+				</h2>
+
+				<table>
+					<thead>
+						<!-- CABEÇALHO PARA PRODUTOS -->
+						<tr th:if="${contexto == 'produtos'}">
+							<th>#</th>
+							<th>Código</th>
+							<th>Nome</th>
+							<th>Descrição</th>
+							<th>Valor</th>
+							<th>Ações</th>
+						</tr>
+
+						<!-- CABEÇALHO PARA USUÁRIOS -->
+						<tr th:if="${contexto == 'usuarios'}">
+							<th>#</th>
+							<th>Nome</th>
+							<th>Email</th>
+							<th>Permissão</th>
+							<th>Ações</th>
+						</tr>
+
+						<!-- CABEÇALHO PADRÃO (CATEGORIAS) -->
+						<tr th:if="${contexto != 'produtos' and contexto != 'usuarios'}">
+							<th>#</th>
+							<th>Nome</th>
+							<th>Ações</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<!-- LISTA DE PRODUTOS -->
+						<tr th:if="${contexto == 'produtos'}" th:each="item, iter : ${categorias}">
+							<td th:text="${iter.index + 1}"></td>
+							<td th:text="${item.codigoProduto}"></td>
+							<td th:text="${item.nome}"></td>
+							<td th:text="${item.descricao}"></td>
+							<td th:text="'R$ ' + ${#numbers.formatDecimal(item.valor, 1, 'POINT', 2, 'COMMA')}"></td>
+							<td class="acoes">
+								<button type="button" class="edit"
+									th:attr="data-id=${item.idProduto}, data-codigo=${item.codigoProduto}, data-nome=${item.nome}, data-descricao=${item.descricao}, data-valor=${item.valor}, data-categoria=${item.categoria != null ? item.categoria.idCategoria : ''}"
+									onclick="abrirEdicaoProduto(this)">Editar</button>
+
+								<form method="post" th:action="@{/removerProduto}" style="margin: 0;">
+									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+									<input type="hidden" name="idProduto" th:value="${item.idProduto}" />
+									<button type="submit" class="delete">Excluir</button>
+								</form>
+							</td>
+						</tr>
+
+						<!-- LISTA DE USUÁRIOS -->
+						<tr th:if="${contexto == 'usuarios'}" th:each="user, iter : ${usuarios}">
+							<td th:text="${iter.index + 1}"></td>
+							<td th:text="${user.nome}"></td>
+							<td th:text="${user.email}"></td>
+							<td th:text="${user.acesso}"></td>
+							<td class="acoes">
+								<!-- Alterar Permissão -->
+								<form method="post" th:action="@{/usuarios/alterar-role/{id}(id=${user.idUsuario})}"
+									style="margin: 0;">
+									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+									<button type="submit" class="edit">
+										Tornar <span
+											th:text="${user.acesso.name() == 'ADMIN' ? 'USER' : 'ADMIN'}"></span>
+									</button>
+								</form>
+
+								<!-- Excluir Usuário -->
+								<form method="post" th:action="@{/usuarios/excluir/{id}(id=${user.idUsuario})}"
+									style="margin: 0;">
+									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+									<button type="submit" class="delete"
+										onclick="return confirm('Deseja realmente excluir este usuário?')">Excluir</button>
+								</form>
+							</td>
+						</tr>
+
+						<!-- LISTA DE CATEGORIAS -->
+						<tr th:if="${contexto != 'produtos' and contexto != 'usuarios'}"
+							th:each="item, iter : ${categorias}">
+							<td th:text="${iter.index + 1}"></td>
+							<td th:text="${item.nome}"></td>
+							<td class="acoes">
+								<button type="button" class="edit"
+									th:attr="data-id=${item.idCategoria}, data-nome=${item.nome}"
+									onclick="abrirEdicaoCategoria(this)">Editar</button>
+
+								<form method="post" th:action="@{/removerCategoria}" style="margin: 0;">
+									<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+									<input type="hidden" name="idCategoria" th:value="${item.idCategoria}" />
+									<button type="submit" class="delete">Excluir</button>
+								</form>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- MODAL FORMULÁRIO (CATEGORIAS E PRODUTOS) -->
+			<div class="modal-overlay" id="modalOverlay" onclick="fecharForm()"></div>
+
+			<div class="card form-card" id="formCard">
+				<h2 id="formTitulo">Formulário</h2>
+
+				<form method="post" id="dinamicoForm" enctype="multipart/form-data">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+					<input type="hidden" name="idCategoria" id="idCategoria">
+
+					<div id="camposLeituraProduto" style="display: none; flex-direction: column; gap: 10px;">
+						<label for="idProduto">ID do Produto (UUID)</label>
+						<input type="text" name="idProduto" id="idProduto" readonly
+							style="background: rgba(255,255,255,0.02); color: #888; cursor: not-allowed;" />
+
+						<label for="codigoProduto">Código do Produto</label>
+						<input type="text" name="codigoProduto" id="codigoProduto" readonly
+							style="background: rgba(255,255,255,0.02); color: #888; cursor: not-allowed;" />
+					</div>
+
+					<label for="nome">Nome</label>
+					<input type="text" name="nome" id="nome" required />
+
+					<div id="camposProduto" style="display: none; flex-direction: column; gap: 10px;">
+						<label for="descricao">Descrição</label>
+						<input type="text" name="descricao" id="descricao" required />
+
+						<label for="valor">Valor (R$)</label>
+						<input type="number" name="valor" id="valor" step="0.01" min="0" required />
+
+						<label for="selectCategoria">Categoria</label>
+						<select name="categoria" id="selectCategoria" required
+							style="padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); background: #111; color: white; outline: none; font-family: inherit;">
+							<option value="" disabled selected>Selecione uma categoria...</option>
+							<option th:each="cat : ${listaCategoriasCompleta}" th:value="${cat.idCategoria}"
+								th:text="${cat.nome}"></option>
+						</select>
+
+						<label for="foto">Foto do Produto</label>
+						<input type="file" name="arquivoFoto" id="foto" accept="image/*" />
+					</div>
+
+					<div class="actions">
+						<button type="submit" class="save" id="botaoSubmit">Salvar</button>
+						<button type="button" class="cancel" onclick="fecharForm()">Cancelar</button>
+					</div>
+				</form>
+			</div>
+
+		</main>
+	</div>
+
+	<script>
+		const formCard = document.getElementById("formCard");
+		const modalOverlay = document.getElementById("modalOverlay");
+		const formTitulo = document.getElementById("formTitulo");
+		const dinamicoForm = document.getElementById("dinamicoForm");
+		const camposProduto = document.getElementById("camposProduto");
+		const camposLeituraProduto = document.getElementById("camposLeituraProduto");
+		const botaoSubmit = document.getElementById("botaoSubmit");
+
+		const inputDescricao = document.getElementById("descricao");
+		const inputValor = document.getElementById("valor");
+		const selectCategoria = document.getElementById("selectCategoria");
+
+		function novaCategoria() {
+			formCard.classList.add("show");
+			modalOverlay.classList.add("show");
+			camposProduto.style.display = "none";
+			camposLeituraProduto.style.display = "none";
+			formTitulo.innerText = "Nova Categoria";
+			dinamicoForm.action = "/adicionarCategoria";
+
+			inputDescricao.removeAttribute("required");
+			inputValor.removeAttribute("required");
+			selectCategoria.removeAttribute("required");
+
+			document.getElementById("idCategoria").value = "";
+			document.getElementById("nome").value = "";
+			botaoSubmit.innerText = "Salvar";
+		}
+
+		function abrirEdicaoCategoria(botao) {
+			formCard.classList.add("show");
+			modalOverlay.classList.add("show");
+			camposProduto.style.display = "none";
+			camposLeituraProduto.style.display = "none";
+			formTitulo.innerText = "Editar Categoria";
+			dinamicoForm.action = "/editarCategoria";
+
+			inputDescricao.removeAttribute("required");
+			inputValor.removeAttribute("required");
+			selectCategoria.removeAttribute("required");
+
+			document.getElementById("idCategoria").value = botao.getAttribute("data-id");
+			document.getElementById("nome").value = botao.getAttribute("data-nome");
+			botaoSubmit.innerText = "Salvar Edição";
+		}
+
+		function novoProduto() {
+			formCard.classList.add("show");
+			modalOverlay.classList.add("show");
+			camposProduto.style.display = "flex";
+			camposLeituraProduto.style.display = "none";
+			formTitulo.innerText = "Novo Produto";
+			dinamicoForm.action = "/adicionarProduto";
+
+			inputDescricao.setAttribute("required", "");
+			inputValor.setAttribute("required", "");
+			selectCategoria.setAttribute("required", "");
+
+			document.getElementById("idProduto").value = "";
+			document.getElementById("codigoProduto").value = "";
+			document.getElementById("nome").value = "";
+			document.getElementById("descricao").value = "";
+			document.getElementById("valor").value = "";
+			selectCategoria.value = "";
+			document.getElementById("foto").value = "";
+
+			botaoSubmit.innerText = "Salvar";
+		}
+
+		function abrirEdicaoProduto(botao) {
+			formCard.classList.add("show");
+			modalOverlay.classList.add("show");
+			camposProduto.style.display = "flex";
+			camposLeituraProduto.style.display = "flex";
+			formTitulo.innerText = "Editar Produto";
+			dinamicoForm.action = "/editarProduto";
+
+			inputDescricao.setAttribute("required", "");
+			inputValor.setAttribute("required", "");
+			selectCategoria.setAttribute("required", "");
+
+			document.getElementById("idProduto").value = botao.getAttribute("data-id");
+			document.getElementById("codigoProduto").value = botao.getAttribute("data-codigo");
+			document.getElementById("nome").value = botao.getAttribute("data-nome");
+			document.getElementById("descricao").value = botao.getAttribute("data-descricao");
+			document.getElementById("valor").value = botao.getAttribute("data-valor");
+
+			selectCategoria.value = botao.getAttribute("data-categoria");
+
+			botaoSubmit.innerText = "Salvar Edição";
+		}
+
+		function fecharForm() {
+			formCard.classList.remove("show");
+			modalOverlay.classList.remove("show");
+		}
+	</script>
+</body>
+
+</html>
