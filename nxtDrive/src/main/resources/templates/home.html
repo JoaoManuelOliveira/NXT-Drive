@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>NXT Drive</title>
+
+	<link rel="stylesheet" th:href="@{/styleHome.css}">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Syncopate:wght@400;700&display=swap"
+		rel="stylesheet">
+
+	<style>
+		/* =========================================================
+		   BOTÃO PAINEL ADMINISTRATIVO E PERFIL
+		   ========================================================= */
+
+		.admin-btn {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+
+			padding: 11px 18px;
+
+			border: 1px solid rgba(255, 255, 255, 0.15);
+			border-radius: 8px;
+
+			background: rgba(255, 255, 255, 0.04);
+
+			color: #fff;
+			text-decoration: none;
+
+			font-family: 'Chakra Petch', sans-serif;
+			font-size: 13px;
+			font-weight: 700;
+
+			letter-spacing: 1px;
+
+			transition:
+				background 0.25s ease,
+				border-color 0.25s ease,
+				transform 0.25s ease,
+				box-shadow 0.25s ease;
+		}
+
+		.admin-btn:hover {
+			background: rgba(255, 255, 255, 0.09);
+			border-color: rgba(255, 255, 255, 0.35);
+
+			transform: translateY(-2px);
+
+			box-shadow:
+				0 8px 25px rgba(0, 0, 0, 0.35);
+		}
+
+		.admin-btn-icon {
+			font-size: 17px;
+			line-height: 1;
+		}
+
+		.admin-btn-text {
+			white-space: nowrap;
+		}
+
+		.admin-btn-arrow {
+			font-size: 16px;
+			opacity: 0.6;
+			transition: transform 0.25s ease;
+		}
+
+		.admin-btn:hover .admin-btn-arrow {
+			transform: translateX(4px);
+			opacity: 1;
+		}
+
+		@media (max-width: 700px) {
+
+			.admin-btn {
+				padding: 9px 12px;
+			}
+
+			.admin-btn-text {
+				display: none;
+			}
+
+		}
+	</style>
+</head>
+
+<body>
+
+	<header class="topbar">
+
+		<div class="logo">
+			<img th:src="@{/img/nxtDriveLogo.jpg}" alt="NXT Drive">
+		</div>
+
+		<nav>
+			<a href="#inicio">Início</a>
+			<a href="#diferenciais">Diferenciais</a>
+			<a href="#produtos">Produtos</a>
+			<a href="#contato">Contato</a>
+		</nav>
+
+		<div class="header-actions">
+
+			<!-- NOME DO USUÁRIO LOGADO & LOGOUT -->
+			<div
+				style="display: flex; align-items: center; gap: 10px; font-family: 'Chakra Petch', sans-serif; font-size: 13px; color: #fff;">
+				<span>Olá, <strong th:text="${nomeUsuario}">Usuário</strong></span>
+				<form th:action="@{/logout}" method="post" style="margin: 0;">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+					<button type="submit"
+						style="background: rgba(255, 51, 102, 0.1); border: 1px solid rgba(255, 51, 102, 0.4); color: #ff3366; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 700; transition: 0.2s;">
+						SAIR
+					</button>
+				</form>
+			</div>
+
+			<!-- BOTÃO PERFIL DO USUÁRIO -->
+			<button class="admin-btn" onclick="abrirPerfil()" title="Meu Perfil">
+				<span class="admin-btn-icon">👤</span>
+				<span class="admin-btn-text">MEU PERFIL</span>
+			</button>
+
+			<!-- PAINEL ADMINISTRATIVO -->
+			<a th:href="@{/dashboard}" class="admin-btn" title="Painel Administrativo">
+				<span class="admin-btn-icon">⚙</span>
+				<span class="admin-btn-text">PAINEL ADMIN</span>
+				<span class="admin-btn-arrow">→</span>
+			</a>
+
+			<button class="search-btn" onclick="abrirBusca()">⌕</button>
+
+			<button class="cart-btn" onclick="abrirCarrinho()">
+				🛒
+				<span id="contadorCarrinho">0</span>
+			</button>
+
+		</div>
+
+	</header>
+
+
+	<section class="hero" id="inicio">
+
+		<div class="hero-content">
+
+			<span class="hero-tag">NXT DRIVE // STORE</span>
+
+			<h1>
+				PEÇAS QUE<br>
+				<span>MOVEM</span> VOCÊ.
+			</h1>
+
+			<p>
+				Performance, estilo e qualidade para o seu carro.
+				Encontre tudo o que precisa em um só lugar.
+			</p>
+
+			<a href="#produtos" class="hero-button">
+				EXPLORAR PRODUTOS
+			</a>
+
+		</div>
+
+		<div class="hero-decoration">
+			<div class="circle"></div>
+			<div class="line"></div>
+			<span>NXT // 01</span>
+		</div>
+
+	</section>
+
+	<!-- DIFERENCIAIS DA LOJA -->
+	<section class="diferenciais-section" id="diferenciais">
+		<div class="diferencial-card">
+			<div class="diferencial-icon">⚡</div>
+			<h3>Envio Expresso</h3>
+			<p>Despacho imediato para todo o Brasil com rastreamento em tempo real.</p>
+		</div>
+
+		<div class="diferencial-card">
+			<div class="diferencial-icon">🛡️</div>
+			<h3>Peças Certificadas</h3>
+			<p>Garantia de procedência e testes rigorosos de qualidade em todo o catálogo.</p>
+		</div>
+
+		<div class="diferencial-card">
+			<div class="diferencial-icon">👨‍🔧</div>
+			<h3>Suporte Especializado</h3>
+			<p>Atendimento guiado por especialistas mecânicos para tirar suas dúvidas.</p>
+		</div>
+
+		<div class="diferencial-card">
+			<div class="diferencial-icon">💳</div>
+			<h3>Pagamento Seguro</h3>
+			<p>Processamento instantâneo via Pix ou cartão com proteção criptografada.</p>
+		</div>
+	</section>
+
+
+	<section class="produtos-section" id="produtos">
+
+		<div class="section-header">
+
+			<div>
+				<span class="section-tag">// CATÁLOGO</span>
+				<h2>Produtos</h2>
+			</div>
+
+			<div class="filtros">
+
+				<button class="filtro ativo" onclick="filtrarProdutos('todos', this)">
+					Todos
+				</button>
+
+				<button th:each="categoria : ${listaCategorias}" class="filtro" th:text="${categoria.nome}"
+					th:attr="data-categoria=${categoria.idCategoria}"
+					onclick="filtrarProdutos(this.getAttribute('data-categoria'), this)">
+				</button>
+
+			</div>
+
+		</div>
+
+
+		<div class="produtos-grid" id="produtosGrid">
+
+			<div class="produto-card" th:each="produto : ${produtos}"
+				th:attr="data-categoria=${produto.categoria != null ? produto.categoria.idCategoria : ''}">
+
+				<div class="produto-imagem">
+
+					<img th:if="${produto.foto != null}" th:src="@{'/produto/imagem/' + ${produto.idProduto}}"
+						th:alt="${produto.nome}">
+
+					<div class="sem-imagem" th:if="${produto.foto == null}">
+						<span>NXT DRIVE</span>
+					</div>
+
+					<div class="produto-categoria" th:if="${produto.categoria != null}"
+						th:text="${produto.categoria.nome}">
+					</div>
+
+				</div>
+
+
+				<div class="produto-info">
+
+					<span class="produto-codigo" th:text="'NXT • ' + ${produto.codigoProduto}">
+					</span>
+
+					<h3 th:text="${produto.nome}">
+						Produto
+					</h3>
+
+					<p th:text="${produto.descricao}">
+						Descrição do produto
+					</p>
+
+					<div class="produto-bottom">
+
+						<strong th:text="'R$ ' + ${#numbers.formatDecimal(produto.valor, 1, 'POINT', 2, 'COMMA')}">
+							R$ 0,00
+						</strong>
+
+						<button class="comprar-btn"
+							th:attr="data-id=${produto.idProduto}, data-nome=${produto.nome}, data-valor=${produto.valor}"
+							onclick="adicionarCarrinho(this)">
+							COMPRAR
+						</button>
+
+					</div>
+
+				</div>
+
+			</div>
+
+
+			<div class="sem-produtos" th:if="${#lists.isEmpty(produtos)}">
+
+				<div class="sem-produtos-icon">∅</div>
+
+				<h3>Nenhum produto encontrado</h3>
+
+				<p>O catálogo ainda está sendo abastecido.</p>
+
+			</div>
+
+		</div>
+
+	</section>
+
+
+	<section class="banner">
+
+		<div>
+
+			<span>// NXT DRIVE</span>
+
+			<h2>
+				SEU CARRO.<br>
+				SUAS REGRAS.
+			</h2>
+
+			<p>
+				Produtos selecionados para quem não aceita menos que o melhor.
+			</p>
+
+		</div>
+
+		<div class="banner-number">
+			01
+		</div>
+
+	</section>
+
+	<!-- ESTATÍSTICAS DA EMPRESA -->
+	<section class="stats-section">
+		<div class="stat-box">
+			<h2>+15K</h2>
+			<p>Clientes Atendidos</p>
+		</div>
+
+		<div class="stat-box">
+			<h2>100%</h2>
+			<p>Peças Homologadas</p>
+		</div>
+
+		<div class="stat-box">
+			<h2>24/7</h2>
+			<p>Atendimento Online</p>
+		</div>
+
+		<div class="stat-box">
+			<h2>4.9★</h2>
+			<p>Avaliação Média</p>
+		</div>
+	</section>
+
+	<!-- NEWSLETTER CLUB -->
+	<section class="newsletter-section">
+		<div class="newsletter-content">
+			<span class="section-tag">// CLUBE NXT DRIVE</span>
+			<h2>RECEBA OFERTAS EXCLUSIVAS</h2>
+			<p>Cadastre seu e-mail para receber cupons de desconto e lançamentos de peças em primeira mão.</p>
+		</div>
+		<form class="newsletter-form" id="newsletterForm" onsubmit="enviarInscricaoNewsletter(event)">
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			<input type="email" id="emailNewsletter" placeholder="Seu e-mail principal..." required>
+			<button type="submit" id="btnNewsletter">INSCREVER</button>
+		</form>
+	</section>
+
+	<!-- ÁREA DE CONTATO -->
+	<section class="contato-section" id="contato">
+		<div class="contato-container">
+
+			<div class="contato-info">
+				<span class="section-tag">// SUPORTE & DÚVIDAS</span>
+				<h2>Fale Conosco</h2>
+				<p>Precisa de suporte técnico, confirmação de compatibilidade ou informações sobre seu pedido?</p>
+
+				<div class="info-itens">
+					<div class="info-item">
+						<span class="info-icon">📍</span>
+						<div>
+							<strong>Endereço Central:</strong>
+							<p>Rua Ita, 55, Jd. Ansalca, Guarulhos - SP</p>
+						</div>
+					</div>
+
+					<div class="info-item">
+						<span class="info-icon">📱</span>
+						<div>
+							<strong>WhatsApp Oficial:</strong>
+							<p>+55 (11) 94177-4214</p>
+						</div>
+					</div>
+
+					<div class="info-item">
+						<span class="info-icon">✉️</span>
+						<div>
+							<strong>E-mail de Atendimento:</strong>
+							<p>contato@nxtdrive.com.br</p>
+						</div>
+					</div>
+
+					<div class="info-item">
+						<span class="info-icon">⏰</span>
+						<div>
+							<strong>Horário de Funcionamento:</strong>
+							<p>Segunda a Sexta: 08:00 às 18:00</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="contato-form-card">
+				<h3>Envie uma Mensagem</h3>
+				<form
+					onsubmit="event.preventDefault(); alert('Mensagem enviada com sucesso! Entraremos em contato em breve.');">
+					<label for="contatoNome">Nome Completo</label>
+					<input type="text" id="contatoNome" placeholder="Seu nome" required />
+
+					<label for="contatoEmail">Seu E-mail</label>
+					<input type="email" id="contatoEmail" placeholder="seuemail@exemplo.com" required />
+
+					<label for="contatoAssunto">Assunto</label>
+					<input type="text" id="contatoAssunto" placeholder="Ex: Dúvida sobre Peça / Pedido" required />
+
+					<label for="contatoMensagem">Mensagem</label>
+					<textarea id="contatoMensagem" rows="4" placeholder="Escreva sua mensagem aqui..."
+						required></textarea>
+
+					<button type="submit" class="hero-button"
+						style="width: 100%; border: none; cursor: pointer; margin-top: 10px;">
+						ENVIAR MENSAGEM
+					</button>
+				</form>
+			</div>
+
+		</div>
+	</section>
+
+
+	<footer>
+
+		<div class="footer-logo">
+			NXT<span>DRIVE</span>
+		</div>
+
+		<p>
+			© 2026 NXT Drive. Todos os direitos reservados.
+		</p>
+
+		<span class="footer-code">
+			SYSTEM // ONLINE
+		</span>
+
+	</footer>
+
+
+	<div class="search-overlay" id="searchOverlay">
+
+		<div class="search-box">
+
+			<button class="close-btn" onclick="fecharBusca()">×</button>
+
+			<span>// PESQUISAR</span>
+
+			<input type="text" id="campoBusca" placeholder="Digite o nome do produto..." oninput="buscarProduto()">
+
+		</div>
+
+	</div>
+
+
+	<div class="cart-overlay" id="cartOverlay">
+
+		<div class="cart-box">
+
+			<button class="close-btn" onclick="fecharCarrinho()">×</button>
+
+			<span class="section-tag">// CARRINHO</span>
+
+			<h2>Seu carrinho</h2>
+
+			<div id="listaCarrinho">
+				<p class="carrinho-vazio">
+					Seu carrinho está vazio.
+				</p>
+			</div>
+
+			<div class="carrinho-total">
+
+				<span>Total</span>
+
+				<strong id="valorTotal">
+					R$ 0,00
+				</strong>
+
+			</div>
+
+			<button class="finalizar-btn" onclick="abrirPix()">
+				FINALIZAR COMPRA
+			</button>
+
+		</div>
+
+	</div>
+
+	<!-- MODAL DE PERFIL DO USUÁRIO E ENDEREÇO -->
+	<div class="cart-overlay" id="perfilOverlay">
+		<div class="cart-box" style="max-width: 520px; text-align: left; max-height: 90vh; overflow-y: auto;">
+			<button class="close-btn" onclick="fecharPerfil()">×</button>
+			<span class="section-tag">// MINHA CONTA</span>
+			<h2 style="margin: 10px 0 20px; font-size: 26px;">Gerenciar Perfil</h2>
+
+			<form id="formPerfil" onsubmit="salvarPerfil(event)">
+				<label
+					style="font-size: 11px; color: #aaa; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 5px;">Nome
+					Completo</label>
+				<input type="text" id="perfilNome" th:value="${nomeUsuario}" required
+					style="width: 100%; padding: 12px; margin-bottom: 12px; background: #080808; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 6px; font-family: inherit; outline: none;">
+
+				<label
+					style="font-size: 11px; color: #aaa; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 5px;">E-mail
+					(deixe em branco para não alterar)</label>
+				<input type="email" id="perfilEmail" th:value="${emailUsuario}"
+					style="width: 100%; padding: 12px; margin-bottom: 12px; background: #080808; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 6px; font-family: inherit; outline: none;">
+
+				<label
+					style="font-size: 11px; color: #aaa; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 5px;">Nova
+					Senha (deixe em branco para não alterar)</label>
+				<input type="password" id="perfilSenha" placeholder="••••••••"
+					style="width: 100%; padding: 12px; margin-bottom: 20px; background: #080808; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 6px; font-family: inherit; outline: none;">
+
+				<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px;">
+				<span
+					style="font-size: 13px; font-weight: bold; color: #3da9ff; display: block; margin-bottom: 15px; font-family: 'JetBrains Mono', monospace;">ENDEREÇO
+					DE ENTREGA</span>
+
+				<div style="display: flex; gap: 10px; margin-bottom: 12px;">
+					<div style="flex: 1;">
+						<label
+							style="font-size: 11px; color: #aaa; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 5px;">CEP</label>
+						<!-- Alterado para oninput para fazer a busca automática enquanto digita -->
+						<input type="text" id="cepInput" th:value="${cepUsuario}" placeholder="00000-000" maxlength="9"
+							oninput="validarEBuscarCep(this.value)"
+							style="width: 100%; padding: 12px; background: #080808; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 6px; font-family: inherit; outline: none;">
+					</div>
+					<div style="flex: 2;">
+						<label
+							style="font-size: 11px; color: #aaa; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 5px;">Logradouro</label>
+						<input type="text" id="logradouroInput" th:value="${logradouroUsuario}"
+							style="width: 100%; padding: 12px; background: #080808; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 6px; font-family: inherit; outline: none;">
+					</div>
+				</div>
+
+				<div style="display: flex; gap: 10px; margin-bottom: 12px;">
+					<div style="flex: 1;">
+						<label
+							style="font-size: 11px; color: #aaa; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 5px;">Bairro</label>
+						<input type="text" id="bairroInput" th:value="${bairroUsuario}"
+							style="width: 100%; padding: 12px; background: #080808; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 6px; font-family: inherit; outline: none;">
+					</div>
+					<div style="flex: 1;">
+						<label
+							style="font-size: 11px; color: #aaa; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 5px;">Cidade</label>
+						<input type="text" id="localidadeInput" th:value="${localidadeUsuario}"
+							style="width: 100%; padding: 12px; background: #080808; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 6px; font-family: inherit; outline: none;">
+					</div>
+					<div style="width: 75px;">
+						<label
+							style="font-size: 11px; color: #aaa; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 5px;">UF</label>
+						<input type="text" id="ufInput" th:value="${ufUsuario}"
+							style="width: 100%; padding: 12px; background: #080808; border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 6px; font-family: inherit; outline: none;">
+					</div>
+				</div>
+
+				<button type="submit" class="finalizar-btn" style="margin-top: 15px;">
+					SALVAR ALTERAÇÕES
+				</button>
+			</form>
+		</div>
+	</div>
+
+	<!-- NOTIFICAÇÃO TOAST -->
+	<div class="toast-container" id="toastContainer"></div>
+
+	<!-- MODAL QR CODE / PAGAMENTO VIA PIX -->
+	<div class="cart-overlay" id="pixOverlay">
+		<div class="cart-box" style="text-align: center; max-width: 450px;">
+			<button class="close-btn" onclick="fecharPix()">×</button>
+			<span class="section-tag">// PAGAMENTO VIA PIX</span>
+			<h2 style="margin: 15px 0 10px;">Como Pagar</h2>
+
+			<div
+				style="background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 8px; text-align: left; font-size: 13px; line-height: 1.6; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.08);">
+				<strong
+					style="color: #3da9ff; display: block; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace;">PASSO
+					A PASSO:</strong>
+				1. Clique no botão <strong>COPIAR CÓDIGO PIX</strong> abaixo ou escaneie o QR Code.<br>
+				2. Abra o aplicativo do seu banco.<br>
+				3. Acesse a área <strong>PIX</strong> e escolha <strong>PIX COPIA E COLA</strong>.<br>
+				4. Cole o código e confirme o pagamento.
+			</div>
+
+			<div
+				style="background: #fff; padding: 15px; border-radius: 10px; display: inline-block; margin-bottom: 15px;">
+				<img id="qrCodeImg" src="" alt="QR Code Pix" style="width: 200px; height: 200px; display: block;">
+			</div>
+
+			<div style="font-size: 18px; font-weight: bold; color: #3da9ff; margin-bottom: 15px; font-family: 'JetBrains Mono', monospace;"
+				id="pixTotal">
+				R$ 0,00
+			</div>
+
+			<!-- Campo oculto para armazenar a string BR Code -->
+			<input type="hidden" id="pixCopiaColaInput">
+
+			<button id="btnCopiarPix" class="finalizar-btn" style="margin-bottom: 10px; padding: 14px;"
+				onclick="copiarPixCode()">
+				📋 COPIAR CÓDIGO PIX (COPIA E COLA)
+			</button>
+
+			<button class="finalizar-btn" style="background: #111; border: 1px solid rgba(255,255,255,0.1);"
+				onclick="concluirPedido()">CONCLUIR PEDIDO</button>
+		</div>
+	</div>
+
+	<script>
+		let carrinho = [];
+
+		// VARIÁVEL DE CONTROLE DE ENDEREÇO
+		let usuarioTemEndereco = false;
+
+		// CONFIGURAÇÃO DA CHAVE PIX
+		const CHAVE_PIX = "+5511941774214";
+		const NOME_RECEBEDOR = "NXT DRIVE";
+		const CIDADE_RECEBEDOR = "SAO PAULO";
+
+		/* =========================================================
+		   CONTROLE DE PERFIL E BUSCA AUTOMÁTICA DE CEP VIA API
+		   ========================================================= */
+		function abrirPerfil() {
+			document.getElementById("perfilOverlay").classList.add("show");
+		}
+
+		function fecharPerfil() {
+			document.getElementById("perfilOverlay").classList.remove("show");
+		}
+
+		// Função intermediária que checa se tem 8 dígitos enquanto digita
+		function validarEBuscarCep(valor) {
+			const cepLimpo = valor.replace(/\D/g, '');
+			if (cepLimpo.length === 8) {
+				consultarCep(cepLimpo);
+			}
+		}
+
+		function consultarCep(cepLimpo) {
+			fetch(`/api/cep/${cepLimpo}`)
+				.then(response => {
+					if (!response.ok) throw new Error("Erro na requisição");
+					return response.json();
+				})
+				.then(data => {
+					if (data && !data.erro) {
+						document.getElementById("logradouroInput").value = data.logradouro || '';
+						document.getElementById("bairroInput").value = data.bairro || '';
+						document.getElementById("localidadeInput").value = data.localidade || '';
+						document.getElementById("ufInput").value = data.uf || '';
+						usuarioTemEndereco = true;
+					} else {
+						alert("CEP não encontrado.");
+					}
+				})
+				.catch(error => {
+					console.error("Erro ao consultar CEP na API local:", error);
+					alert("Erro ao realizar consulta de CEP.");
+				});
+		}
+
+		function salvarPerfil(event) {
+			event.preventDefault();
+			usuarioTemEndereco = true;
+			alert("Dados de perfil e endereço salvos com sucesso!");
+			fecharPerfil();
+		}
+
+		/* =========================================================
+		   INSCRIÇÃO NA NEWSLETTER
+		   ========================================================= */
+		function enviarInscricaoNewsletter(event) {
+			event.preventDefault();
+
+			const email = document.getElementById("emailNewsletter").value;
+			const btn = document.getElementById("btnNewsletter");
+
+			btn.disabled = true;
+			btn.innerText = "ENVIANDO...";
+
+			const tokenInput = document.querySelector("input[name='_csrf']");
+			const token = tokenInput ? tokenInput.value : "";
+
+			fetch("/api/newsletter/inscrever?email=" + encodeURIComponent(email), {
+				method: "POST",
+				headers: {
+					"X-CSRF-TOKEN": token
+				}
+			})
+				.then(response => {
+					if (response.ok) {
+						alert("🔥 Inscrição realizada! Verifique sua caixa de entrada para resgatar o cupom NXTDRIVEZEIRO.");
+						document.getElementById("emailNewsletter").value = "";
+					} else {
+						alert("Ocorreu um erro ao enviar o e-mail. Tente novamente.");
+					}
+				})
+				.catch(error => {
+					console.error("Erro:", error);
+					alert("Erro de conexão ao enviar inscrição.");
+				})
+				.finally(() => {
+					btn.disabled = false;
+					btn.innerText = "INSCREVER";
+				});
+		}
+
+		/* =========================================================
+		   GERADOR PIX (BR CODE / EMV OFICIAL BANCO CENTRAL)
+		   ========================================================= */
+		function formatarCampo(id, valor) {
+			const tamanho = valor.length.toString().padStart(2, '0');
+			return `${id}${tamanho}${valor}`;
+		}
+
+		function calcularCRC16(payload) {
+			payload += "6304";
+			let crc = 0xFFFF;
+			for (let i = 0; i < payload.length; i++) {
+				crc ^= (payload.charCodeAt(i) << 8);
+				for (let j = 0; j < 8; j++) {
+					if ((crc & 0x8000) !== 0) {
+						crc = (crc << 1) ^ 0x1021;
+					} else {
+						crc = (crc << 1);
+					}
+					crc &= 0xFFFF;
+				}
+			}
+			return payload + crc.toString(16).toUpperCase().padStart(4, '0');
+		}
+
+		function gerarPayloadPix(chave, nome, cidade, valor, txid = 'NXTDRIVE') {
+			const nomeClean = nome.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().substring(0, 25);
+			const cidadeClean = cidade.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().substring(0, 15);
+
+			const gui = formatarCampo('00', 'br.gov.bcb.pix');
+			const key = formatarCampo('01', chave);
+			const merchantAccount = formatarCampo('26', gui + key);
+
+			const mcc = formatarCampo('52', '0000');
+			const currency = formatarCampo('53', '986');
+			const amount = formatarCampo('54', valor.toFixed(2));
+			const country = formatarCampo('58', 'BR');
+			const merchantName = formatarCampo('59', nomeClean);
+			const merchantCity = formatarCampo('60', cidadeClean);
+
+			const txidField = formatarCampo('05', txid);
+			const additionalData = formatarCampo('62', txidField);
+
+			const payloadSemCRC =
+				formatarCampo('00', '01') +
+				merchantAccount +
+				mcc +
+				currency +
+				amount +
+				country +
+				merchantName +
+				merchantCity +
+				additionalData;
+
+			return calcularCRC16(payloadSemCRC);
+		}
+
+		/* =========================================================
+		   FUNÇÕES DO CARRINHO E INTERFACE
+		   ========================================================= */
+		function adicionarCarrinho(botao) {
+			const id = botao.getAttribute("data-id");
+			const nome = botao.getAttribute("data-nome");
+			const valor = parseFloat(botao.getAttribute("data-valor"));
+
+			carrinho.push({id, nome, valor});
+
+			atualizarCarrinho();
+			mostrarNotificacao(nome);
+		}
+
+		function mostrarNotificacao(nomeProduto) {
+			const container = document.getElementById("toastContainer");
+			const toast = document.createElement("div");
+			toast.className = "toast";
+			toast.innerHTML = `
+				<span class="toast-icon">✓</span>
+				<span><strong>${nomeProduto}</strong> adicionado ao carrinho!</span>
+			`;
+			container.appendChild(toast);
+
+			setTimeout(() => {toast.remove();}, 3000);
+		}
+
+		function atualizarCarrinho() {
+			const contador = document.getElementById("contadorCarrinho");
+			contador.innerText = carrinho.length;
+
+			const lista = document.getElementById("listaCarrinho");
+			const total = document.getElementById("valorTotal");
+
+			if (carrinho.length === 0) {
+				lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio.</p>';
+				total.innerText = "R$ 0,00";
+				return;
+			}
+
+			lista.innerHTML = "";
+			let valorTotal = 0;
+
+			carrinho.forEach((produto, index) => {
+				valorTotal += produto.valor;
+				const item = document.createElement("div");
+				item.className = "carrinho-item";
+				item.innerHTML = `
+					<div>
+						<strong>${produto.nome}</strong>
+						<span>R$ ${produto.valor.toFixed(2).replace(".", ",")}</span>
+					</div>
+					<button onclick="removerCarrinho(${index})">×</button>
+				`;
+				lista.appendChild(item);
+			});
+
+			total.innerText = "R$ " + valorTotal.toFixed(2).replace(".", ",");
+		}
+
+		function removerCarrinho(index) {
+			carrinho.splice(index, 1);
+			atualizarCarrinho();
+		}
+
+		function abrirCarrinho() {
+			document.getElementById("cartOverlay").classList.add("show");
+		}
+
+		function fecharCarrinho() {
+			document.getElementById("cartOverlay").classList.remove("show");
+		}
+
+		function abrirBusca() {
+			document.getElementById("searchOverlay").classList.add("show");
+			document.getElementById("campoBusca").focus();
+		}
+
+		function fecharBusca() {
+			document.getElementById("searchOverlay").classList.remove("show");
+		}
+
+		function buscarProduto() {
+			const busca = document.getElementById("campoBusca").value.toLowerCase();
+			const produtos = document.querySelectorAll(".produto-card");
+
+			produtos.forEach(produto => {
+				const nome = produto.querySelector("h3").innerText.toLowerCase();
+				produto.style.display = nome.includes(busca) ? "" : "none";
+			});
+		}
+
+		function filtrarProdutos(categoria, botao) {
+			document.querySelectorAll(".filtro").forEach(btn => btn.classList.remove("ativo"));
+			botao.classList.add("ativo");
+
+			document.querySelectorAll(".produto-card").forEach(produto => {
+				const categoriaProduto = produto.getAttribute("data-categoria");
+				produto.style.display = (categoria === "todos" || categoriaProduto === categoria) ? "" : "none";
+			});
+		}
+
+		/* =========================================================
+		   EXIBIÇÃO, GERAÇÃO DO QR CODE E VALIDAÇÃO DE ENDEREÇO
+		   ========================================================= */
+		function abrirPix() {
+			if (carrinho.length === 0) {
+				alert("Seu carrinho está vazio!");
+				return;
+			}
+
+			if (!usuarioTemEndereco) {
+				alert("⚠️ Você precisa cadastrar o seu endereço de entrega no seu Perfil antes de finalizar a compra!");
+				fecharCarrinho();
+				abrirPerfil();
+				return;
+			}
+
+			const total = carrinho.reduce((acc, item) => acc + item.valor, 0);
+			document.getElementById("pixTotal").innerText = "R$ " + total.toFixed(2).replace(".", ",");
+
+			const pixPayload = gerarPayloadPix(CHAVE_PIX, NOME_RECEBEDOR, CIDADE_RECEBEDOR, total);
+
+			document.getElementById("pixCopiaColaInput").value = pixPayload;
+
+			const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(pixPayload)}`;
+			document.getElementById("qrCodeImg").src = qrUrl;
+
+			const btnCopiar = document.getElementById("btnCopiarPix");
+			btnCopiar.innerText = "📋 COPIAR CÓDIGO PIX (COPIA E COLA)";
+
+			fecharCarrinho();
+			document.getElementById("pixOverlay").classList.add("show");
+		}
+
+		function copiarPixCode() {
+			const codigoPix = document.getElementById("pixCopiaColaInput").value;
+
+			if (!codigoPix) return;
+
+			navigator.clipboard.writeText(codigoPix).then(() => {
+				const btnCopiar = document.getElementById("btnCopiarPix");
+				btnCopiar.innerText = "✓ CÓDIGO COPIADO COM SUCESSO!";
+
+				setTimeout(() => {
+					btnCopiar.innerText = "📋 COPIAR CÓDIGO PIX (COPIA E COLA)";
+				}, 4000);
+			}).catch(err => {
+				alert("Não foi possível copiar automaticamente. O código é:\n\n" + codigoPix);
+			});
+		}
+
+		function fecharPix() {
+			document.getElementById("pixOverlay").classList.remove("show");
+		}
+
+		function concluirPedido() {
+			fecharPix();
+			carrinho = [];
+			atualizarCarrinho();
+			alert("Pedido concluído com sucesso!");
+		}
+
+		/* =========================================================
+		   BLOQUEIO DO BOTÃO "VOLTAR" DO NAVEGADOR
+		   ========================================================= */
+		window.history.pushState(null, "", window.location.href);
+		window.onpopstate = function () {
+			window.history.pushState(null, "", window.location.href);
+		};
+
+		window.addEventListener("pageshow", function (event) {
+			if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+				window.location.reload();
+			}
+		});
+	</script>
+
+</body>
+
+</html>
